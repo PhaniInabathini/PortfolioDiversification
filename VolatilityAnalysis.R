@@ -1,7 +1,12 @@
 install.packages("rugarch")
 # get S&P Data
 library(quantmod)
+library(dplyr)
+library(tidyverse)
+library(tseries)
 library(e1071)
+library(xts)
+library(PerformanceAnalytics)
 library(rugarch)
 # Imlementing a GARCH model
 getSymbols("SNP",from = "2004-01-01",to = Sys.Date())
@@ -26,3 +31,25 @@ curve(dnorm(x,mean = m,sd = s),from = -0.3, to = 0.2,
       add = TRUE,col = "red")
 par(mfrow=c(1,1))
 kurtosis(ret)
+
+#Implementation using AAPL stock data
+getSymbols("AAPL",from = '2006-01-01',to = '2018-12-31')
+ret.AAPL <- dailyReturn(Cl(AAPL), type = 'log')
+chartSeries(ret.AAPL)
+#specifications for a GARCH(1,1) model.
+garch11.spec <- ugarchspec(variance.model = 
+                             list(model = 'sGARCH',
+                                  garchOrder = c(1,1)),
+                           mean.model = list(armaOrder = c(0,0))
+                           )
+aapl.garch11.fit <- ugarchfit(spec = garch11.spec,data = ret.AAPL)
+coef(aapl.garch11.fit)
+
+########### We are implementing a new model using TESLA stock #############
+tesla_df = getSymbols("TSLA",from = '2010-01-01',to = '2020-12-31')
+
+chartSeries(TSLA)
+head(TSLA)
+
+#Plotting a 1 month result for Dec 2020
+chartSeries(TSLA['2020-12'])
